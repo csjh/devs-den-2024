@@ -1,25 +1,7 @@
 import './style.css'
-import { makeCoordinate, distance, addCoordinates } from './coordinates.mite';
 
-function updateCoordinate(coord) {
-    const coordinate_el = document.getElementById('coordinate');
-    coordinate_el.innerHTML = `${coord.x.toLocaleString()}, ${coord.y.toLocaleString()}`;
-
-    const distance_el = document.getElementById('distance');
-    distance_el.innerHTML = distance(coord, makeCoordinate(0, 0)).toLocaleString();
-}
-
-let coordinate = makeCoordinate(1, 2);
-updateCoordinate(coordinate);
-
-const randomize = document.getElementById('randomize');
-randomize.addEventListener('click', () => {
-    coordinate = addCoordinates(coordinate, makeCoordinate(Math.random(), Math.random()));
-    updateCoordinate(coordinate);
-});
-
-
-import { calc_color } from "./mandelbrot.mite";
+import { calc_color as calc_color_js } from "./mandelbrot.js";
+import { calc_color as calc_color_mite, calc_color2 } from "./mandelbrot.mite";
 
 const canvas = document.getElementById("canvas");
 const ox = document.getElementById("x");
@@ -33,11 +15,16 @@ canvas.width = IMAGEWIDTH;
 canvas.height = IMAGEHEIGHT;
 const imagedata = context.createImageData(IMAGEWIDTH, IMAGEHEIGHT);
 
+globalThis.useWASM = true;
+
 function generateImage() {
     const x = +ox.value;
     const y = +oy.value;
     const w = +width.value;
 
+    const calc_color = globalThis.useWASM ? calc_color_mite : calc_color_js;
+
+    console.time("Generate Image");
     for (let row = 0; row < IMAGEHEIGHT; row++) {
         for (let col = 0; col < IMAGEWIDTH; col++) {
             const rgb = calc_color(col, row, x, y, w);
@@ -51,6 +38,7 @@ function generateImage() {
     }
 
     context.putImageData(imagedata, 0, 0);
+    console.timeEnd("Generate Image");
 }
 
 generateImage();
@@ -75,4 +63,25 @@ document.getElementById("preset3").addEventListener("click", () => {
     oy.value = "0.13182733";
     width.value = "0.00012068";
     generateImage();
+});
+
+import { makeCoordinate, distance, addCoordinates } from './coordinates.mite';
+
+function updateCoordinate(coord) {
+    const coordinate_el = document.getElementById('coordinate');
+    coordinate_el.innerHTML = `${coord.x.toLocaleString()}, ${coord.y.toLocaleString()}`;
+
+    const distance_el = document.getElementById('distance');
+    distance_el.innerHTML = distance(coord, makeCoordinate(0, 0)).toLocaleString();
+}
+
+let coordinate = makeCoordinate(1, 2);
+updateCoordinate(coordinate);
+
+const randomize = document.getElementById('randomize');
+randomize.addEventListener('click', () => {
+    // coordinate = addCoordinates(coordinate, makeCoordinate(Math.random(), Math.random()));
+    coordinate.x += Math.random();
+    coordinate.y += Math.random();
+    updateCoordinate(coordinate);
 });

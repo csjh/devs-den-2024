@@ -39,7 +39,7 @@ fn interpolation(f: f64, c0: i32, c1: i32): i32 {
     return r << 16 | g << 8 | b << 0;
 }
 
-export fn get_color(d: f64): i32 {
+fn get_color(d: f64): i32 {
     if (d >= 0.0) {
         let k = 0.021 * (d - 1.0 + log(log(128.0)) / log(2.0));
         k = log(1.0 + k) - 29.0 / 400.0;
