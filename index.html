@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+</head>
+
+<body>
+    <div id="app">
+        <div>
+            <h1>Hello Dev's Den!</h1>
+            <button id="randomize">Add Random Coordinates</button>
+            <p class="read-the-docs">Current coordinate:
+            <div id="coordinate"></div>
+            </p>
+            <p class="read-the-docs">Distance from (0, 0):
+            <div id="distance"></div>
+            </p>
+        </div>
+        <div>
+            <div style="margin-bottom: 12px">
+                <canvas id="canvas"></canvas>
+            </div>
+            <div style="margin-bottom: 12px">
+                <input type="number" id="x" value="-0.7" />
+                <input type="number" id="y" value="0.0" />
+                <input type="number" id="width" value="3.0769" />
+            </div>
+            <button style="margin-bottom: 12px" type="button" id="button">Calculate</button>
+            <div>
+                <button type="button" id="preset1">Preset #1</button>
+                <button type="button" id="preset2">Preset #2</button>
+                <button type="button" id="preset3">Preset #3</button>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="/main.js"></script>
+</body>
+
+</html>

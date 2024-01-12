@@ -1,0 +1,84 @@
+fn fastlog2(x: f64): f64 {
+    let vx = reinterpret(f32(x));
+    let mx = reinterpret(i32((vx & 0x007FFFFF) | 0x3f000000));
+    let y: f32 = f32(vx) * 0.00000011920928955078125;
+
+    return f64(y - f32(124.22551499) - f32(1.498030302) * mx - f32(1.72587999) / (f32(0.3520887068) + mx));
+}
+
+fn log(x: f64): f64 {
+    return 0.69314718 * fastlog2(x);
+}
+
+fn iter(cx: f64, cy: f64): f64 {
+    let x = 0.0;
+    let y = 0.0;
+    for (let i = 1; i <= 1000; i += 1) {
+        let newx = x * x - y * y + cx;
+        let newy = 2.0 * x * y + cy;
+        x = newx;
+        y = newy;
+        let smodz = x * x + y * y;
+        if (smodz >= 4.0) {
+            return f64(i) + 1.0 - log(log(smodz) * 0.5) / log(2.0);
+        };
+    };
+    return 0.0-1.0;
+}
+
+fn interpolation(f: f64, c0: i32, c1: i32): i32 {
+    let r0 = c0 >> 16 & 0xFF;
+    let g0 = c0 >> 8  & 0xFF;
+    let b0 = c0 >> 0  & 0xFF;
+    let r1 = c1 >> 16 & 0xFF;
+    let g1 = c1 >> 8  & 0xFF;
+    let b1 = c1 >> 0  & 0xFF;
+    let r = i32((1.0 - f) * f64(r0) + f * f64(r1) + 0.5);
+    let g = i32((1.0 - f) * f64(g0) + f * f64(g1) + 0.5);
+    let b = i32((1.0 - f) * f64(b0) + f * f64(b1) + 0.5);
+    return r << 16 | g << 8 | b << 0;
+}
+
+export fn get_color(d: f64): i32 {
+    if (d >= 0.0) {
+        let k = 0.021 * (d - 1.0 + log(log(128.0)) / log(2.0));
+        k = log(1.0 + k) - 29.0 / 400.0;
+        k -= f64(floor(k));
+        k *= 400.0;
+        if (k < 63.0) {
+            return interpolation(k / 63.0, 0x000764, 0x206BCB);
+        } else if (k < 167.0) {
+            return interpolation((k - 63.0) / (167.0 - 63.0), 0x206BCB, 0xEDFFFF);
+        } else if (k < 256.0) {
+            return interpolation((k - 167.0) / (256.0 - 167.0), 0xEDFFFF, 0xFFAA00);
+        } else if (k < 342.0) {
+            return interpolation((k - 256.0) / (342.0 - 256.0), 0xFFAA00, 0x310230);
+        } else {
+            return interpolation((k - 342.0) / (400.0 - 342.0), 0x310230, 0x000764);
+        };
+    } else {
+        return 0x000000;
+    };
+}
+
+export fn calc_color(col: i32, row: i32, ox: f64, oy: f64, width: f64): i32 {
+    let pixel_size = width / 800.0;
+    let cx = (f64(col) - 399.5) * pixel_size + ox;
+    let cy = (f64(row) - 300.0) * pixel_size + oy;
+    let r = 0;
+    let g = 0;
+    let b = 0;
+    for (let i = 0-1; i <= 1; i += 1) {
+        for (let j = 0-1; j <= 1; j += 1) {
+            let d = iter(cx + f64(i) * pixel_size / 3.0, cy + f64(j) * pixel_size / 3.0);
+            let c = get_color(d);
+            r += c >> 16 & 0xFF;
+            g += c >> 8  & 0xFF;
+            b += c >> 0  & 0xFF;
+        };
+    };
+    r /= 9;
+    g /= 9;
+    b /= 9;
+    return r << 16 | g << 8 | b << 0;
+}
