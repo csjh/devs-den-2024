@@ -1,7 +1,6 @@
 import './style.css'
 
-import { calc_color as calc_color_js } from "./mandelbrot.js";
-import { calc_color as calc_color_mite, calc_color2 } from "./mandelbrot.mite";
+import { calc_color } from "./mandelbrot.mite";
 
 const canvas = document.getElementById("canvas");
 const ox = document.getElementById("x");
@@ -15,14 +14,10 @@ canvas.width = IMAGEWIDTH;
 canvas.height = IMAGEHEIGHT;
 const imagedata = context.createImageData(IMAGEWIDTH, IMAGEHEIGHT);
 
-globalThis.useWASM = true;
-
 function generateImage() {
     const x = +ox.value;
     const y = +oy.value;
     const w = +width.value;
-
-    const calc_color = globalThis.useWASM ? calc_color_mite : calc_color_js;
 
     console.time("Generate Image");
     for (let row = 0; row < IMAGEHEIGHT; row++) {
@@ -80,8 +75,8 @@ updateCoordinate(coordinate);
 
 const randomize = document.getElementById('randomize');
 randomize.addEventListener('click', () => {
-    // coordinate = addCoordinates(coordinate, makeCoordinate(Math.random(), Math.random()));
-    coordinate.x += Math.random();
-    coordinate.y += Math.random();
+    coordinate = addCoordinates(coordinate, makeCoordinate(Math.random(), Math.random()));
+    // coordinate.x += Math.random();
+    // coordinate.y += Math.random();
     updateCoordinate(coordinate);
 });

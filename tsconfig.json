@@ -1,0 +1,7 @@
+{
+    "compilerOptions": {
+        "rootDirs": [".", "./.mite/types"],
+        "checkJs": true
+    },
+    "include": ["mandelbrot.js", "main.js"]
+}
