@@ -2,10 +2,10 @@ import './style.css'
 
 import { calc_color } from "./mandelbrot.mite";
 
-const canvas = document.getElementById("canvas");
-const ox = document.getElementById("x");
-const oy = document.getElementById("y");
-const width = document.getElementById("width");
+const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById("canvas"));
+const ox = /** @type {HTMLInputElement} */ (document.getElementById("x"));
+const oy = /** @type {HTMLInputElement} */ (document.getElementById("y"));
+const width = /** @type {HTMLInputElement} */ (document.getElementById("width"));
 const button = document.getElementById("button");
 const context = canvas.getContext("2d");
 const IMAGEWIDTH = 800;
