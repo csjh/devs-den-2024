@@ -1,6 +1,7 @@
 import './style.css'
 
-import { calc_color } from "./mandelbrot.mite";
+import { generate_image } from "./mandelbrot.mite";
+import { calc_color } from './mandelbrot.js';
 
 const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById("canvas"));
 const ox = /** @type {HTMLInputElement} */ (document.getElementById("x"));
@@ -14,12 +15,12 @@ canvas.width = IMAGEWIDTH;
 canvas.height = IMAGEHEIGHT;
 const imagedata = context.createImageData(IMAGEWIDTH, IMAGEHEIGHT);
 
-function generateImage() {
+function generateImageJS() {
     const x = +ox.value;
     const y = +oy.value;
     const w = +width.value;
 
-    console.time("Generate Image");
+    console.time("Generate Image with Javascript");
     for (let row = 0; row < IMAGEHEIGHT; row++) {
         for (let col = 0; col < IMAGEWIDTH; col++) {
             const rgb = calc_color(col, row, x, y, w);
@@ -33,8 +34,22 @@ function generateImage() {
     }
 
     context.putImageData(imagedata, 0, 0);
-    console.timeEnd("Generate Image");
+    console.timeEnd("Generate Image with Javascript");
 }
+
+function generateImageMite() {
+    console.time("Generate Image with Mite")
+    const mite_array = generate_image(IMAGEHEIGHT, IMAGEWIDTH, +ox.value, +oy.value, +width.value);
+    const mite_imagedata = new ImageData(
+        new Uint8ClampedArray(mite_array.buffer, mite_array.byteOffset, mite_array.length),
+        IMAGEWIDTH,
+        IMAGEHEIGHT
+    );
+    context.putImageData(mite_imagedata, 0, 0);
+    console.timeEnd("Generate Image with Mite")
+}
+
+const generateImage = generateImageMite;
 
 generateImage();
 button.addEventListener('click', generateImage);

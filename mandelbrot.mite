@@ -61,7 +61,7 @@ fn get_color(d: f64): i32 {
     };
 }
 
-export fn calc_color(col: i32, row: i32, ox: f64, oy: f64, width: f64): i32 {
+fn calc_color(col: i32, row: i32, ox: f64, oy: f64, width: f64): i32 {
     let pixel_size = width / 800.0;
     let cx = (f64(col) - 399.5) * pixel_size + ox;
     let cy = (f64(row) - 300.0) * pixel_size + oy;
@@ -81,4 +81,20 @@ export fn calc_color(col: i32, row: i32, ox: f64, oy: f64, width: f64): i32 {
     g /= 9;
     b /= 9;
     return r << 16 | g << 8 | b << 0;
+}
+
+export fn generate_image(height: i32, width: i32, x: f64, y: f64, w: f64): [u8; 1920000] {
+    let data: [u8; 1920000];
+    for (let row = 0; row < height; row += 1) {
+        for (let col = 0; col < width; col += 1) {
+            let rgb = calc_color(col, row, x, y, w);
+            let idx = (row * 800 + col) * 4;
+
+            data[idx + 0] = u8(rgb >> 16);
+            data[idx + 1] = u8(rgb >> 8);
+            data[idx + 2] = u8(rgb >> 0);
+            data[idx + 3] = u8(0xFF);
+        };
+    };
+    return data;
 }
