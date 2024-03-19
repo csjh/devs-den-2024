@@ -1,4 +1,4 @@
-import { defineConfig, UserConfig } from "vite";
+import { defineConfig } from "vite";
 import { mite } from "mite/vite";
 
 export default defineConfig({
