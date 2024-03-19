@@ -1,19 +1,3 @@
-function iter(cx, cy) {
-    let x = 0.0;
-    let y = 0.0;
-    for (let i = 1; i <= 1000; i += 1) {
-        let newx = x * x - y * y + cx;
-        let newy = 2.0 * x * y + cy;
-        x = newx;
-        y = newy;
-        let smodz = x * x + y * y;
-        if (smodz >= 4.0) {
-            return i + 1.0 - Math.log(Math.log(smodz) * 0.5) / Math.log(2.0);
-        };
-    };
-    return 0.0 - 1.0;
-}
-
 function interpolation(f, c0, c1) {
     let r0 = c0 >> 16 & 0xFF;
     let g0 = c0 >> 8 & 0xFF;
@@ -49,24 +33,42 @@ function get_color(d) {
     };
 }
 
-export function calc_color(col, row, ox, oy, width) {
-    let pixel_size = width / 800.0;
-    let cx = (col - 399.5) * pixel_size + ox;
-    let cy = (row - 300.0) * pixel_size + oy;
-    let r = 0;
-    let g = 0;
-    let b = 0;
-    for (let i = 0 - 1; i <= 1; i += 1) {
-        for (let j = 0 - 1; j <= 1; j += 1) {
-            let d = iter(cx + i * pixel_size / 3.0, cy + j * pixel_size / 3.0);
-            let c = get_color(d);
-            r += c >> 16 & 0xFF;
-            g += c >> 8 & 0xFF;
-            b += c >> 0 & 0xFF;
+function calc_color(col, row, ox, oy, width) {
+    const pixel_size = width / 800.0;
+    const cx = (col - 399.5) * pixel_size + ox;
+    const cy = (row - 300.0) * pixel_size + oy;
+    let zr = cx;
+    let zi = cy;
+    let k = 0;
+    while (++k < 1000) {
+        let zr1 = zr * zr - zi * zi + cx;
+        let zi1 = zr * zi + zr * zi + cy;
+        zr = zr1;
+        zi = zi1;
+        if (zr * zr + zi * zi >= 4.0) {
+            break;
+        }
+    }
+    if (k == 1000) {
+        k = -1;
+    } else {
+        k += 1.0 - Math.log(Math.log(zr * zr + zi * zi) * 0.5) / Math.log(2.0);
+    }
+    return get_color(k);
+}
+
+export function generate_image(height, width, x, y, w) {
+    const data = new Uint8ClampedArray(800 * 600 * 4);
+    for (let row = 0; row < height; row += 1) {
+        for (let col = 0; col < width; col += 1) {
+            let rgb = calc_color(col, row, x, y, w);
+            let idx = (row * 800 + col) * 4;
+
+            data[idx + 0] = (rgb >> 16) & 0xFF;
+            data[idx + 1] = (rgb >> 8) & 0xFF;
+            data[idx + 2] = (rgb >> 0) & 0xFF;
+            data[idx + 3] = 0xFF;
         };
     };
-    r /= 9;
-    g /= 9;
-    b /= 9;
-    return r << 16 | g << 8 | b << 0;
+    return data;
 }
